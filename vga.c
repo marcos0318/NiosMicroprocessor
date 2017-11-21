@@ -15,24 +15,12 @@ void printDec ( int val ) { printf ("%u\n", val); }
 
 
 void write_pixel(int x, int y, short colour) {
+
   volatile short *vga_addr=(volatile short*)(ADDR_VGA + (y<<10) + (x<<1));
   *vga_addr=colour;
   return;
 }
 
-
-/* use write_pixel to set entire screen to black (does not clear the character buffer) */
-void clear_screen() {
-
-  //int x, y;
-  //for (x = 0; x < 320; x++) {
-  //for (y = 0; y < 240; y++) {
-	 //write_pixel(x,y,0xf800);
-	  
-	//}
- //}
- print_gameboard(mockBoard);
-}
 
 
 /*the print screen function takes the address of the game board 
@@ -67,21 +55,6 @@ int mockBoard[240] = {
 
 
 
-void print_gameboard(int* board_addr) {
-  int x, y;
-  for (x=0; x<10; x++) {
-    for (y=0; y<24; y++) {
-      if (*board_addr == 1)
-        print_block(x*10 + 100, y*10, 0xffcc);
-      else if (*board_addr == 0);
-        print_block(x*10 + 100, y*10, 0xffff);
-      else if (*board_addr == 2)
-        print_block(x*10 + 100, y*10, 0xf800);
-      board_addr++;
-    }
-  }
-}
-
 /* we have board as 24*10. the height of the screen is 240
 then the size of a single block is 10*10, so we scale the block
 position by ten*/
@@ -92,4 +65,33 @@ void print_block(int a, int b, short colour) {
       write_pixel(a+x, b+y, colour);
     }
   }
+}
+
+void print_gameboard(int* board_addr) {
+  int x, y;
+  for (x=0; x<10; x++) {
+    for (y=0; y<24; y++) {
+      if (*board_addr == 1)
+        print_block(x*10 + 100, y*10, 0xffcc);
+      else if (*board_addr == 0)
+        print_block(x*10 + 100, y*10, 0xffff);
+      else if (*board_addr == 2)
+        print_block(x*10 + 100, y*10, 0xf800);
+      board_addr++;
+    }
+  }
+}
+
+
+/* use write_pixel to set entire screen to black (does not clear the character buffer) */
+void clear_screen() {
+
+  //int x, y;
+  //for (x = 0; x < 320; x++) {
+  //for (y = 0; y < 240; y++) {
+	 //write_pixel(x,y,0xf800);
+	  
+	//}
+ //}
+ print_gameboard(mockBoard);
 }

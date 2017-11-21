@@ -5,7 +5,7 @@
 # addresses
 .equ TIMER, 0xFF202000     # timer 0 address
 .equ KEYBOARD, 0xFF200100 # PS2 0 address
-
+.equ PUSHBUTTONS, 0xFF200050
 
 .equ ADDR_VGA, 0x08000000
 .equ ADDR_CHAR, 0x09000000
@@ -47,7 +47,6 @@ GameState:
 
 myISR:
 	
-
 	#store temp variables et, ctl1, r8 and r9
 	addi sp, sp, -16
 	stw et, 0(sp)
@@ -62,11 +61,6 @@ myISR:
 
     rdctl et, ctl4
 
-
-	mov r8, et
-
-	mov r4, et
-	call printDec
 
 	mov r8, et
 
@@ -106,7 +100,7 @@ keyboardInterrupt:
 	movi r8, 0xFF # mask to get the data
 	and et, et, r8
 
-	mov r4, r8
+	mov r4, et
 	call printDec
 	br exitISR
 
@@ -127,6 +121,10 @@ keyboardInterrupt:
 
 buttonInterrupt:
 # check which button
+
+	movia r8,PUSHBUTTONS
+	movia r9,0xF	  # Enable interrrupt mask = 1110
+	stwio r9,12(r8) # Clear edge capture register to prevent unexpected interrupt
 
 	movi r4, 2 # button prints 2
 	call printDec
@@ -170,7 +168,7 @@ exitISR:
 	addi sp,sp, 16
 	subi ea, ea, 4
 
-	movi r4, 0 # exit ISR prints 0
+	movi r4, 0
 	call printDec
 
 	eret
@@ -190,7 +188,7 @@ main:
 
 	call initSp
 	call initBoardState
-	#call clear_screen
+	call clear_screen
 
 	#enable global interrupts:
 	movia r8, 1
@@ -265,6 +263,11 @@ setupKeyboard:
 	ret
 
 setupButton:
+
+	movia r8,PUSHBUTTONS
+	movia r9,0b0111	  # Enable interrrupt mask = 1110
+	stwio r9,8(r8)  # Enable interrupts on pushbuttons 1,2, and 3
+	stwio r9,12(r8) # Clear edge capture register to prevent unexpected interrupt
 
 	rdctl r8, ctl3
 	movi r9, 0b10 # mask
