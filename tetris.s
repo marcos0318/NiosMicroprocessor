@@ -68,15 +68,19 @@ myISR:
 	mov r4, et
 	call printDec
 
-	movi r9, 1
+	mov r8, et
+
+
 	andi r8, r8, 0b10000000 # check if interrupt pending from IRQ7 (keyboard)
-	beq r8, r9, keyboardInterrupt # if true go to keyboardInterrupt
+
+	bgt r8, r0, keyboardInterrupt # if true go to keyboardInterrupt
+
 
 	andi r8, et, 0b10 # check if interrupt pending from IRQ1 (button press)
-	beq r8, r9, buttonInterrupt
+	bgt r8, r0, buttonInterrupt
 
 	andi r8, et, 0b1 # check if pending from IRQ0 (timer)
-	beq r8,r9, timerInterrupt
+	bgt r8,r0, timerInterrupt
 
 
 	br exitISR # no interupt detected?
@@ -88,7 +92,7 @@ keyboardInterrupt:
 	# read only the first element in the queue
 
 	movia r8, KEYBOARD
-	ldw et, 0(r8)
+	ldwio et, 0(r8)
 
 	# is data valid:
 
