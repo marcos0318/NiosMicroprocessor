@@ -4,6 +4,9 @@
 .data
 # addresses
 .equ TIMER, 0xFF202000     # timer 0 address
+.equ KEYBOARD, 0xFF200100 # PS2 0 address
+
+
 .equ ADDR_VGA, 0x08000000
 .equ ADDR_CHAR, 0x09000000
 
@@ -13,7 +16,7 @@ Timeout_period: .word 100000000
 
 # the block infomation of the game
 # the game size is 24*10
-# we store each block's infomation in words so we skip 24*10*4 bytes
+# we store each block infomation in words so we skip 24*10*4 bytes
 .align 2
 BoardState:
 	.skip 960
@@ -41,11 +44,74 @@ GameState:
 
 .text
 .section .exceptions, "ax"
+
 myISR:
+	
+
+	#store temp variables et, ctl1, r8 and r9
+	addi sp, sp, -16
+	stw et, 0(sp)
+
+	rdctl et, ctl1
+	stw et, 4(sp)  #Make a backup of ctl1 because we'll enable nested interrupts
+	
+	stw r8, 8(sp)
+	stw r9, 12(sp)
+
 	# find out interupt here
+
+    rdctl et, ctl4
+
+
+	mov r8, et
+
+	mov r4, et
+	call printDec
+
+	movi r9, 1
+	andi r8, r8, 0b10000000 # check if interrupt pending from IRQ7 (keyboard)
+	beq r8, r9, keyboardInterrupt # if true go to keyboardInterrupt
+
+	andi r8, et, 0b10 # check if interrupt pending from IRQ1 (button press)
+	beq r8, r9, buttonInterrupt
+
+	andi r8, et, 0b1 # check if pending from IRQ0 (timer)
+	beq r8,r9, timerInterrupt
+
+
+	br exitISR # no interupt detected?
+
+
 
 keyboardInterrupt:
 # check which key is pressed 
+	# read only the first element in the queue
+
+	movia r8, KEYBOARD
+	ldw et, 0(r8)
+
+	# is data valid:
+
+	srli r8, et, 15
+	andi r8, r8, 1
+
+	beq r8, r0, exitISR # invalid data
+
+	# else
+
+	movi r8, 0xFF # mask to get the data
+	and et, et, r8
+
+	mov r4, r8
+	call printDec
+	br exitISR
+
+	
+
+
+	
+
+
 # if the result is valid, rotate ccw
 # if the result is valid, rotate cw
 # if the result is valud, move left 
@@ -57,6 +123,11 @@ keyboardInterrupt:
 
 buttonInterrupt:
 # check which button
+
+	movi r4, 2 # button prints 2
+	call printDec
+	br exitISR
+
 
 # reset the game
 # increase the difficulty
@@ -82,7 +153,22 @@ timerInterrupt:
 	stwio r0, 0(r8)
 
 exitISR:
+	#restore variables
+	ldw et, 4(sp)¨
+	wrctl ctl1, et
+
+	ldw et, 0(sp)
+	
+	ldw r8, 8(sp)
+	ldw r9, 12(sp)
+
+
+	addi sp,sp, 16
 	subi ea, ea, 4
+
+	movi r4, 0 # exit ISR prints 0
+	call printDec
+
 	eret
 
 
@@ -160,13 +246,30 @@ setupTimer:
 	ret
 
 setupKeyboard:
+	movia r8, KEYBOARD
+	movi r9, 0x1 # enable read interrupts
+	stwio r9, 4(r8) # 
+
+	rdctl r8, ctl3
+	movi r9, 0b10000000 # mask 
+	or	r8, r8, r9 # or
+	wrctl ctl3, r8 # enable timer interupts on IRQ line 7
+
+
+
 
 	ret
 
 setupButton:
+
+	rdctl r8, ctl3
+	movi r9, 0b10 # mask
+	or	r8, r8, r9 # or
+	wrctl ctl3, r8 # enable timer interupts on line 1
 
 	ret
 
 startGame:
 	
 	ret
+
