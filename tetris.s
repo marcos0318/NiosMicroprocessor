@@ -9,7 +9,7 @@
 
 # the controller of game speed 
 .align 2 
-Timeout_period: .word 100000000
+Timeout_period: .word 1000000000
 
 # the block infomation of the game
 # the game size is 24*10
