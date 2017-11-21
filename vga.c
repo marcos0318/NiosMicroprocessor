@@ -23,30 +23,60 @@ void write_pixel(int x, int y, short colour) {
 
 /* use write_pixel to set entire screen to black (does not clear the character buffer) */
 void clear_screen() {
-  int x, y;
-  for (x = 0; x < 320; x++) {
-    for (y = 0; y < 240; y++) {
-	  write_pixel(x,y,0xf800);
+
+  //int x, y;
+  //for (x = 0; x < 320; x++) {
+  //for (y = 0; y < 240; y++) {
+	 //write_pixel(x,y,0xf800);
 	  
-	}
- }
+	//}
+ //}
+ print_gameboard(mockBoard);
 }
 
 
 /*the print screen function takes the address of the game board 
 and print it to the VGA out put by using write block function*/
 // 320 = 107*3 -1, just take 100 as the offset of x
- 
+int mockBoard[240] = {
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,2,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,1,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,2,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,1,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,3,0,0,0,0,
+  0,0,0,0,0,3,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+};
+
+
+
 void print_gameboard(int* board_addr) {
   int x, y;
   for (x=0; x<10; x++) {
     for (y=0; y<24; y++) {
       if (*board_addr == 1)
-        print_block(x*10 + 100, y*10, 0x66ffcc);
+        print_block(x*10 + 100, y*10, 0xffcc);
       else if (*board_addr == 0);
-        print_block(x*10 + 100, y*10, 0);
+        print_block(x*10 + 100, y*10, 0xffff);
       else if (*board_addr == 2)
-        print_block(x*10 + 100, y*10, 0x11f800);
+        print_block(x*10 + 100, y*10, 0xf800);
       board_addr++;
     }
   }
