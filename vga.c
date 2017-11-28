@@ -95,3 +95,24 @@ void clear_screen() {
  //}
  print_gameboard(mockBoard);
 }
+
+// checks if block underneath is occupied and by what
+int block_below(int* board_addr, int block) {
+	if(block >= 230) // bottom of the screen
+		return 1; // block below is taken
+	return *board_addr[block+10];
+}
+
+int is_clear(int* board_addr) {
+	// check that for each falling part the block below is either also falling or empty
+	int i;
+	for(i=0;i<240;i++) {
+		if(*board_addr[i] >= 2) {
+			int below = block_below(board_addr, i);
+			if(below == 1)
+				return 0;
+		}
+	}
+	return 1;
+}
+
