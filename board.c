@@ -19,9 +19,9 @@ void randomInit() {
 // The default starting point of "2" is (4, 1)
 int insertType(int* board_addr, int typeIndex) {
   int x0 = 4;
-  int y0 = 1;
+  int y0 = 2;
   int* center = board_addr + y0*10 + x0;
-  *center = 2;
+  *center = 3;
   switch (typeIndex) {
     case 0:
       *(center-10) = 2;
