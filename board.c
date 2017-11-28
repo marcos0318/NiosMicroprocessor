@@ -1,7 +1,4 @@
 #include <stdlib.h>
-void randomInit() {
-  srand(time(NULL));
-}
 /*
 1. We are using 7 type of blocks, they are numbered in sequence
 2. 2 implies it is the center, 1 means the one should change during the rotation
@@ -13,6 +10,9 @@ void randomInit() {
 32  322  223   232   32  32  2322
                       2  2
 */
+void randomInit() {
+  srand(time(NULL));
+}
 
 // board_addr, the address of the board
 // typeIndex is the block type that you want to add
@@ -59,6 +59,7 @@ int insertType(int* board_addr, int typeIndex) {
       *(center+2) = 2;
       break;
   }
+  return 0;
 }
 
 void setLose(int* gamestate) {
