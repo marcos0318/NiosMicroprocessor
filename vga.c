@@ -92,8 +92,8 @@ void clear_screen() {
 	 //write_pixel(x,y,0xf800);
 	  
 	//}
- //}
- print_gameboard(mockBoard);
+  //}
+  print_gameboard(mockBoard);
 }
 
 // checks if block underneath is occupied and by what
