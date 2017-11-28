@@ -21,6 +21,12 @@ void write_pixel(int x, int y, short colour) {
   return;
 }
 
+/* cell types:
+0 - empty block
+1 - taken block
+2 - falling figure
+3 - center of the figure
+*/
 
 
 /*the print screen function takes the address of the game board 
