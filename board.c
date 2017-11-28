@@ -7,10 +7,11 @@ void randomInit() {
 2. 2 implies it is the center, 1 means the one should change during the rotation
 3. the stopped blocks at button will be marked like 3, empty is 0
 */
+
 /*  The format of the blocks
-11  1      1    1    1    1
-21  211  112   121   21  21  1211
-                      1  1
+22  2      2    2    2    2
+32  322  223   232   32  32  2322
+                      2  2
 */
 
 // board_addr, the address of the board
@@ -23,42 +24,41 @@ int insertType(int* board_addr, int typeIndex) {
   *center = 2;
   switch (typeIndex) {
     case 0:
-      *(center-10) = 1;
-      *(center+1) = 1;
-      *(center-9) = 1;
+      *(center-10) = 2;
+      *(center+1) = 2;
+      *(center-9) = 2;
       break;
     case 1:
-      *(center-10) = 1;
-      *(center+1) = 1;
-      *(center+2) = 1;
+      *(center-10) = 2;
+      *(center+1) = 2;
+      *(center+2) = 2;
       break;
     case 2:
-      *(center-10) = 1;
-      *(center-1) = 1;
-      *(center-2) = 1;
+      *(center-10) = 2;
+      *(center-1) = 2;
+      *(center-2) = 2;
       break;
     case 3:
-      *(center-10) = 1;
-      *(center+1) = 1;
-      *(center-1) = 1;
+      *(center-10) = 2;
+      *(center+1) = 2;
+      *(center-1) = 2;
       break;
     case 4:
-      *(center-10) = 1;
-      *(center+1) = 1;
-      *(center+11) = 1;
+      *(center-10) = 2;
+      *(center+1)  = 2;
+      *(center+11) = 2;
       break;
     case 5:
-      *(center-9) = 1;
-      *(center+1) = 1;
-      *(center+2) = 1;
+      *(center-9) = 2;
+      *(center+1) = 2;
+      *(center+10) = 2;
       break;
     case 6:
-      *(center-10) = 1;
-      *(center+1) = 1;
-      *(center+10) = 1;
+      *(center-1) = 2;
+      *(center+1) = 2;
+      *(center+2) = 2;
       break;
   }
-
 }
 
 void setLose(int* gamestate) {
