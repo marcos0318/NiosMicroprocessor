@@ -94,21 +94,29 @@ keyboardInterrupt:
 	andi r8, r8, 1
 
 	beq r8, r0, exitISR # invalid data
+	
+	bgt r23, r0, ignoreKey
 
 	# else
 
 	movi r8, 0xFF # mask to get the data
 	and et, et, r8
 
+	
+	movi r4, 240
+	beq et, r4, setIgnore
+
 	mov r4, et
 	call printDec
 	br exitISR
 
-	
+setIgnore:
+	movi r23, 1
+	br exitISR
 
-
-	
-
+ignoreKey:
+	movi r23, 0
+	br exitISR
 
 # if the result is valid, rotate ccw
 # if the result is valid, rotate cw
@@ -168,8 +176,6 @@ exitISR:
 	addi sp,sp, 16
 	subi ea, ea, 4
 
-	movi r4, 0
-	call printDec
 
 	eret
 
@@ -190,13 +196,16 @@ main:
 	call initBoardState
 	call clear_screen
 
-	#enable global interrupts:
-	movia r8, 1
-	wrctl ctl0, r8
+
+
+	call setupTimer
 
 	call setupKeyboard
 	call setupButton
-	call setupTimer
+
+	#enable global interrupts:
+	movia r8, 1
+	wrctl ctl0, r8
 
 	call startGame
 loop: 
