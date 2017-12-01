@@ -75,8 +75,8 @@ void print_block(int a, int b, short colour) {
 
 void print_gameboard(int* board_addr) {
   int x, y;
-  for (x=0; x<10; x++) {
-    for (y=0; y<24; y++) {
+  for (y=0; y<24; y++) {    
+     for (x=0; x<10; x++) {
       if (*board_addr == 1)
         print_block(x*10 + 100, y*10, 0xffcc);
       else if (*board_addr == 0)
