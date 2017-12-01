@@ -106,13 +106,47 @@ keyboardInterrupt:
 	movi r4, 240
 	beq et, r4, setIgnore
 
-	mov r4, et
-	call printDec
+
+	movia r4, BoardState # first argument is board address
+
+	movi r5, 28 # A - move left
+	beq et, r5, moveLeft
+	
+	movi r5, 35 # D - move right
+	beq et, r5, moveRight
+
+	movi r5, 27 # S - move down
+	beq et, r5, moveDown
+
+	movi r5, 29 # W - move up
+	beq et, r5, moveUp # rotate
+
+	br exitISR # no key pressed from WASD
+
+
+moveLeft:
+	movi r5, 0
+	call move_block
 	br exitISR
+moveRight:
+	movi r5, 3
+	call move_block
+	br exitISR
+moveUp:
+	movi r5, 2
+	call move_block
+	br exitISR
+moveDown:
+	movi r5, 1
+	call move_block
+	br exitISR
+
 
 setIgnore:
 	movi r23, 1
 	br exitISR
+
+move_block:
 
 ignoreKey:
 	movi r23, 0
@@ -192,7 +226,7 @@ main:
   #sthio r4,1032(r2) /* pixel (4,1) is x*2 + y*1024 so (8 + 1024 = 1032) */
   #stbio r5,132(r3) /* character (4,1) is x + y*128 so (4 + 128 = 132) */
 
-	call initSp
+	#call initSp
 	call initBoardState
 	call clear_screen
 
