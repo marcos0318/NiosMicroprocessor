@@ -109,17 +109,19 @@ keyboardInterrupt:
 
 	movia r4, BoardState # first argument is board address
 
-	movi r5, 28 # A - move left
+
+	movi r5, 28 # A - left
 	beq et, r5, moveLeft
 	
-	movi r5, 35 # D - move right
+	movi r5, 35 # D - right
 	beq et, r5, moveRight
 
-	movi r5, 27 # S - move down
+	movi r5, 27 # S - down
 	beq et, r5, moveDown
 
-	movi r5, 29 # W - move up
+	movi r5, 29 # W - up
 	beq et, r5, moveUp # rotate
+
 
 	br exitISR # no key pressed from WASD
 
@@ -132,6 +134,7 @@ moveRight:
 	movi r5, 3
 	call move_block
 	br exitISR
+
 moveUp:
 	movi r5, 2
 	call move_block
@@ -139,7 +142,10 @@ moveUp:
 moveDown:
 	movi r5, 1
 	call move_block
+
 	br exitISR
+
+
 
 
 setIgnore:
@@ -147,6 +153,9 @@ setIgnore:
 	br exitISR
 
 move_block:
+	mov r4, r5
+	call printDec
+	br exitISR
 
 ignoreKey:
 	movi r23, 0
@@ -191,10 +200,19 @@ timerInterrupt:
 # check the scroe, increse the difficulty every ?? loop
 
 # debug msg
-	movi r4, 1
-	call printDec
+	movia r4, BoardState
+	call descend
+	beq r2, r0, newBlock
 	movia r8, TIMER
 	stwio r0, 0(r8)
+	br exitISR
+
+newBlock:
+	movia r4, BoardState
+	call storeBlock
+	movia r4, BoardState
+	movia r5, GameState
+	call createNewBlock
 
 exitISR:
 	#restore variables
@@ -228,7 +246,7 @@ main:
 
 	#call initSp
 	call initBoardState
-	call clear_screen
+	#call clear_screen
 
 
 
@@ -320,6 +338,16 @@ setupButton:
 	ret
 
 startGame:
-	
+	addi sp, sp, -4
+	stw ra,0(sp)
+
+	movia r4, BoardState
+	movia r5, GameState
+	call createNewBlock
+	movia r4, BoardState
+	call print_gameboard
+	ldw ra,0(sp)
+	addi sp,sp, 4
+
 	ret
 

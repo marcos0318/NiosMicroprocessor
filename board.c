@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 /*
 1. We are using 7 type of blocks, they are numbered in sequence
 2. 2 implies it is the center, 1 means the one should change during the rotation
@@ -18,6 +20,7 @@ void randomInit() {
 // typeIndex is the block type that you want to add
 // The default starting point of "2" is (4, 1)
 int insertType(int* board_addr, int typeIndex) {
+  printf("Type: %i\n",typeIndex);
   int x0 = 4;
   int y0 = 2;
   int* center = board_addr + y0*10 + x0;
