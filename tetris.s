@@ -137,24 +137,21 @@ moveRight:
 
 moveUp:
 	movi r5, 2
-	call move_block
+	#call move_block
+	call rotate
 	br exitISR
 moveDown:
 	movi r5, 1
-	call move_block
-
+	#call move_block
+	call descend
 	br exitISR
 
-
+rotate:
+	br exitISR
 
 
 setIgnore:
 	movi r23, 1
-	br exitISR
-
-move_block:
-	mov r4, r5
-	call printDec
 	br exitISR
 
 ignoreKey:
@@ -245,6 +242,7 @@ main:
   #stbio r5,132(r3) /* character (4,1) is x + y*128 so (4 + 128 = 132) */
 
 	#call initSp
+	call randomInit
 	call initBoardState
 	#call clear_screen
 

@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include "vga.h"
 #define ADDR_VGA 0x08000000
 
 void printOct ( int val ) { printf ("%o\n", val); }
@@ -134,7 +134,7 @@ void copy_board(int* new_board, int* board_addr) {
 	}
 }
 int descend(int* board_addr){
-	printf("descend %i",board_addr);
+	printf("descend %i\n",board_addr);
 	if(is_clear(board_addr) == 0) {
 		return 0;
 	}

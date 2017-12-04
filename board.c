@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include "vga.h"
 /*
 1. We are using 7 type of blocks, they are numbered in sequence
 2. 2 implies it is the center, 1 means the one should change during the rotation
@@ -14,6 +15,8 @@
                       2  2
 */
 void randomInit() {
+  float n = time(NULL);   
+  printf("%.2f\n" , n);      
   srand(time(NULL));
 }
 
@@ -23,7 +26,7 @@ void randomInit() {
 int insertType(int* board_addr, int typeIndex) {
   printf("Type: %i\n",typeIndex);
   int x0 = 4;
-  int y0 = 2;
+  int y0 = 1;
   int* center = board_addr + y0*10 + x0;
   *center = 3;
   switch (typeIndex) {
@@ -84,12 +87,7 @@ void createNewBlock(int* board_addr, int* gamestate) {
   }
 }
 
-void copy_board(int* new_board, int* board_addr) {
-  int i;
-  for (i=0; i<240; i++) {
-    new_board[i] = board_addr[i];
-  }
-}
+
 
 void remove_falling_block(int* board_addr) {
   int i;
@@ -108,14 +106,15 @@ void remove_falling_block(int* board_addr) {
 void move_block(int* board_addr, int direction) {
   // 0   1  2   3
   // left up down right
-
+  printf("%d\n", direction);
   int temp_board[240]={0};
+
   int i;
   int valid = 1;
   int x_min = 10;
   int x_max = -1;
   // check x the min and max of block
-  for (int i=0; i<240; i++) {
+  for (i=0; i<240; i++) {
     if ( *(board_addr+i) > 1 && *(board_addr+i) < 4) {
       int x = i%10;
       // update the min and max
@@ -123,27 +122,41 @@ void move_block(int* board_addr, int direction) {
       if (x_max < x) x_max = x;
 
       // if on the boundary and coresbonding move is invalid
-      if (x_min == 0 && direction == 1) return;
-      if (x_max == 9 && direction == 3) return;
+      if (x_min == 0 && direction == 0) {
+		printf("return because of x_min 0, direction 1\n");
+		return;
+	  }
+      if (x_max == 9 && direction == 3) {
+		printf("return because of x_max 9, direction 3\n");
+		return;
+	  }
     }
   }
 
+
   // collision checking
-  for (int i=0; i<240; i++) {
+  for (i=0; i<240; i++) {
     if ( *(board_addr+i) > 1 && *(board_addr+i) < 4) {
       if (direction == 0) {
-        if ( *(board_addr+i-1)<2) return;
+        if ( *(board_addr+i-1)==1){
+			printf("return because of block left side is taken\n");
+			return;
+		} 
       } else if (direction == 3) {
-        if ( *(board_addr+i+1)<2) return;
+        if ( *(board_addr+i+1)==1){ 
+			printf("return because of block right side is taken\n");
+			return;
+		}
       }
     }
   }
 
   // things are valid, move the block
+  printf("\n\nhere\n");
   copy_board(temp_board, board_addr);
   remove_falling_block(temp_board);
 
-  for (int i=0; i<240; i++) {
+  for (i=0; i<240; i++) {
     if ( *(board_addr+i) > 1 && *(board_addr+i) < 4) {
       if (direction == 0) {
         temp_board[i-1] = board_addr[i];
@@ -153,4 +166,5 @@ void move_block(int* board_addr, int direction) {
     }
   }
   copy_board(board_addr, temp_board);
+  print_gameboard(board_addr);
 }
