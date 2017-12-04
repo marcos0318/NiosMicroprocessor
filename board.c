@@ -152,4 +152,5 @@ void move_block(int* board_addr, int direction) {
       }
     }
   }
+  copy_board(board_addr, temp_board);
 }
