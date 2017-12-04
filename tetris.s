@@ -6,7 +6,7 @@
 .equ TIMER, 0xFF202000     # timer 0 address
 .equ KEYBOARD, 0xFF200100 # PS2 0 address
 .equ PUSHBUTTONS, 0xFF200050
-
+.equ LED, 0xFF200000
 .equ ADDR_VGA, 0x08000000
 .equ ADDR_CHAR, 0x09000000
 
@@ -171,11 +171,76 @@ buttonInterrupt:
 # check which button
 
 	movia r8,PUSHBUTTONS
-	movia r9,0xF	  # Enable interrrupt mask = 1110
+	movia r9,0xF	  # Enable interrrupt mask = 1111
+	ldwio r4,12(r8) # find value of button
 	stwio r9,12(r8) # Clear edge capture register to prevent unexpected interrupt
 
-	movi r4, 2 # button prints 2
-	call printDec
+	movi r8, 1
+	beq r4, r8, decreaseDiff
+	movi r8, 2
+	beq r4, r8, increaseDiff
+	movi r8, 4
+	beq r4, r8, resetGame
+	br exitISR
+
+decreaseDiff:
+	movia r8, Difficulty
+	ldw r9, 0(r8)
+	beq r9, r0, exitISR
+	addi r9, r9, -1
+	stw r9, 0(r8)
+	mov r4, r9
+	br setDif
+
+increaseDiff:
+	movia r8, Difficulty
+	ldw r9, 0(r8)
+	movi r4, 5
+	beq r9, r4, exitISR
+	addi r9, r9, 1
+	stw r9, 0(r8)
+	mov r4, r9
+	br setDif # only for clarity
+
+setDif:
+
+updateLED:
+	# difficulty in r4
+	
+	mov r8, r4 
+	movi r10, 1
+	loopled:
+		beq r8, r0, doneled
+		slli r10, r10, 1
+		addi r10, r10, 1
+		addi r8, r8, -1
+		br loopled
+	doneled:
+	movia r9, LED
+	stwio r10, 0(r9)
+
+updateSPEED:
+	# difficulty in r4
+	addi r4,r4, 1
+	movia r9, 100000000
+	div r4, r9, r4 # r4 = r9 / r4
+	movia r9, Timeout_period # read the timeout period in the memory
+	stw r4, 0(r9) # store the new timeout
+	call setupTimer
+
+
+	br exitISR
+
+resetGame:
+	# reset score
+	movia r8, Score
+	stw r0, 0(r8)
+	# reset difficulty
+	movia r8, Difficulty
+	stw r0, 0(r8)
+	# reset board
+	call initBoardState
+	call startGame
 	br exitISR
 
 
@@ -248,7 +313,8 @@ main:
 
 
 
-	call setupTimer
+	#call setupTimer 
+	# called from startGame
 
 	call setupKeyboard
 	call setupButton
@@ -324,7 +390,7 @@ setupKeyboard:
 setupButton:
 
 	movia r8,PUSHBUTTONS
-	movia r9,0b0111	  # Enable interrrupt mask = 1110
+	movia r9,0b0111	  # Enable interrrupt mask = 0111
 	stwio r9,8(r8)  # Enable interrupts on pushbuttons 1,2, and 3
 	stwio r9,12(r8) # Clear edge capture register to prevent unexpected interrupt
 
@@ -338,6 +404,20 @@ setupButton:
 startGame:
 	addi sp, sp, -4
 	stw ra,0(sp)
+
+	# set difficulty to 0
+	movia r4, Difficulty
+	stw r0, 0(r4)
+
+	# update difficulty LED
+	movia r4, LED
+	movi r5, 1
+	stwio r5, 0(r4)
+	# set timer to default value
+	movia r9, 100000000
+	movia r8, Timeout_period
+	stw r9, 0(r8) 
+	call setupTimer
 
 	movia r4, BoardState
 	movia r5, GameState
