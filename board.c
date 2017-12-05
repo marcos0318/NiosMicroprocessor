@@ -182,7 +182,7 @@ void move_block(int* board_addr, int direction) {
           printf("rotate out of boundary\n");
           return;
         }
-        if ( board_addr[new_block_num] = 1) {
+        if ( board_addr[new_block_num] == 1) {
           printf("rotate to a taken block\n");
           return;
         }
@@ -209,3 +209,4 @@ void move_block(int* board_addr, int direction) {
   copy_board(board_addr, temp_board);
   print_gameboard(board_addr);
 }
+

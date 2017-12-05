@@ -136,9 +136,9 @@ moveRight:
 	br exitISR
 
 moveUp:
-	movi r5, 2
-	#call move_block
-	call rotate
+	movi r5, 1
+	call move_block
+	#call rotate
 	br exitISR
 moveDown:
 	movi r5, 1
@@ -146,8 +146,6 @@ moveDown:
 	call descend
 	br exitISR
 
-rotate:
-	br exitISR
 
 
 setIgnore:
@@ -262,12 +260,22 @@ timerInterrupt:
 # check the scroe, increse the difficulty every ?? loop
 
 # debug msg
-	movia r4, BoardState
-	call descend
-	beq r2, r0, newBlock
 	movia r8, TIMER
 	stwio r0, 0(r8)
+
+
+	movia r4, BoardState
+	#call check_line # is line filled up?
+
+
+	#bgt r2, r0, addScore
+	call descend
+	beq r2, r0, newBlock
+	
 	br exitISR
+
+addScore:
+	
 
 newBlock:
 	movia r4, BoardState
