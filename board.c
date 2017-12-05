@@ -246,7 +246,7 @@ int moveDownTakenBy(int* board_addr, int line_number) {
   copy_board(board_addr, local_board);
 }
 
-void check_line_filled (int *board_addr) {
+int check_line_filled (int *board_addr) {
   int cleared_lines = 0;
   // we check from to to the end
   // if a line is all taken, o out that line, move the taken blocks above down by1
@@ -260,5 +260,6 @@ void check_line_filled (int *board_addr) {
   }
 
   // then print the board
-
+  print_gameboard(board_addr);
+  return cleared_lines * cleared_lines; 
 }
