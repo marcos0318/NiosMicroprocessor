@@ -15,16 +15,19 @@
                       2  2
 */
 void randomInit() {
-  float n = time(NULL);
-  printf("%.2f\n" , n);
-  srand(time(NULL));
+  srand(12222223); // the seed(time(NULL));
 }
 
 // board_addr, the address of the board
 // typeIndex is the block type that you want to add
 // The default starting point of "2" is (4, 1)
 int insertType(int* board_addr, int typeIndex) {
-  printf("Type: %i\n",typeIndex);
+  // check if game over
+  int i;
+  for(i=0;i<30;i++) {
+	if(board_addr[i] == 1)
+		return -1;
+  }
   int x0 = 4;
   int y0 = 1;
   int* center = board_addr + y0*10 + x0;
@@ -133,7 +136,6 @@ void remove_falling_block(int* board_addr) {
 void move_block(int* board_addr, int direction) {
   // 0   1  2   3
   // left rotate down right
-  printf("%d\n", direction);
   int temp_board[240]={0};
   int center;
   int i;
@@ -223,11 +225,11 @@ void zeroOutTakenUntil(int *board_addr, int line_number) {
 
 int isLineFilled(int* board_addr, int line_number) {
   // line is from 0 to 23
-  int filled == 1;
+  int filled = 1;
   int i;
   for (i = 0; i < 10; i++) {
     if (board_addr[line_number*10 + i] != 1) {
-      filled == 0;
+      filled = 0;
     }
   }
   return filled;
@@ -238,7 +240,7 @@ int moveDownTakenBy(int* board_addr, int line_number) {
   copy_board(local_board, board_addr);
   zeroOutTakenUntil(local_board, line_number);
   int i;
-  for (i=0; i< (line_number-1)*10; i++) {
+  for (i=0; i< (line_number)*10; i++) {
     if (board_addr[i] == 1) {
       local_board[i+10] = 1;
     }
@@ -261,5 +263,6 @@ int check_line_filled (int *board_addr) {
 
   // then print the board
   print_gameboard(board_addr);
+  cleared_lines *= 10;
   return cleared_lines * cleared_lines; 
 }

@@ -10,6 +10,24 @@
 .equ ADDR_VGA, 0x08000000
 .equ ADDR_CHAR, 0x09000000
 
+.equ ADDR_HEX, 0xFF200020
+.equ ADDR_HEX2, 0xFF200030 # off by 16
+
+
+.align 2
+HexChars:
+	.word 0b0111111 # 0
+	.word 0b0000110 # 1
+	.word 0b1011011 # 2
+	.word 0b1001111 # 3
+	.word 0b1100110 # 4
+	.word 0b1101101 # 5
+	.word 0b1111101 # 6
+	.word 0b0000111 # 7
+	.word 0b1111111 # 8
+	.word 0b1101111 # 9
+
+
 # the controller of game speed 
 .align 2 
 Timeout_period: .word 100000000
@@ -52,7 +70,7 @@ myISR:
 	stw et, 0(sp)
 
 	rdctl et, ctl1
-	stw et, 4(sp)  #Make a backup of ctl1 because we'll enable nested interrupts
+	stw et, 4(sp) 
 	
 	stw r8, 8(sp)
 	stw r9, 12(sp)
@@ -85,6 +103,8 @@ keyboardInterrupt:
 # check which key is pressed 
 	# read only the first element in the queue
 
+
+
 	movia r8, KEYBOARD
 	ldwio et, 0(r8)
 
@@ -105,6 +125,13 @@ keyboardInterrupt:
 	
 	movi r4, 240
 	beq et, r4, setIgnore
+
+
+	movia r9, GameState
+	ldw r9, 0(r9)
+	movi r5, -1
+	beq r5, r9, exitISR # game has ended
+
 
 
 	movia r4, BoardState # first argument is board address
@@ -142,8 +169,14 @@ moveUp:
 	br exitISR
 moveDown:
 	movi r5, 1
-	#call move_block
 	call descend
+# update score
+	movia r4, Score
+	ldw r5, 0(r4)
+	addi r5, r5, 1 # add one for each down press
+	stw r5, 0(r4)
+	call setScore
+
 	br exitISR
 
 
@@ -156,14 +189,6 @@ ignoreKey:
 	movi r23, 0
 	br exitISR
 
-# if the result is valid, rotate ccw
-# if the result is valid, rotate cw
-# if the result is valud, move left 
-# if the result is valid, move right
-
-# if the result is valid, move up/dowm 
-# (not needed in the real game, but be useful in testing)
-# reprint the gameboard 
 
 buttonInterrupt:
 # check which button
@@ -260,21 +285,41 @@ timerInterrupt:
 # check the scroe, increse the difficulty every ?? loop
 
 # debug msg
+
+
+
 	movia r8, TIMER
 	stwio r0, 0(r8)
 
+	movia r8, GameState
+	ldw et, 0(r8)
+	movi r9, -1
+	beq et, r9, exitISR # game has ended
+
+
 
 	movia r4, BoardState
-	#call check_line # is line filled up?
 
-
-	#bgt r2, r0, addScore
 	call descend
 	beq r2, r0, newBlock
-	
-	br exitISR
 
-addScore:
+	movia r4, BoardState
+
+	call check_line_filled
+
+	# update score
+	movia r4, Score
+	ldw r5, 0(r4)
+
+	add r5, r5, r2
+
+	stw r5, 0(r4)
+
+
+	call setScore
+
+
+	br exitISR
 	
 
 newBlock:
@@ -304,25 +349,11 @@ exitISR:
 
 .global main
 main:
-# ...
 	#initialization
-	# VGA testing code in main, this works well
-  #movia r2,ADDR_VGA
-  #movia r3, ADDR_CHAR
-  #movui r4,0xffff  /* White pixel */
-  #movi  r5, 0x41   /* ASCII for 'A' */
-  #sthio r4,1032(r2) /* pixel (4,1) is x*2 + y*1024 so (8 + 1024 = 1032) */
-  #stbio r5,132(r3) /* character (4,1) is x + y*128 so (4 + 128 = 132) */
-
-	#call initSp
 	call randomInit
 	call initBoardState
-	#call clear_screen
-
-
-
-	#call setupTimer 
-	# called from startGame
+	movi r4, 0
+	call setHEX
 
 	call setupKeyboard
 	call setupButton
@@ -335,10 +366,6 @@ main:
 loop: 
     br loop
 	ret	# Make sure this returns to main's caller
-
-initSp:
-	movia sp, 0x03FFFFFC
-	ret
 
 initBoardState: 
 	# set all the data in the gamestate to 0
@@ -429,11 +456,171 @@ startGame:
 
 	movia r4, BoardState
 	movia r5, GameState
+	stw r0, 0(r5) # set gamestate to 0
+
 	call createNewBlock
 	movia r4, BoardState
 	call print_gameboard
+
+
 	ldw ra,0(sp)
 	addi sp,sp, 4
 
+	ret
+
+setScore:
+	movia r7, Score
+	ldw r4, 0(r7)
+
+setHEX:
+	# argument in r4
+	movia r7, ADDR_HEX
+	movia r8, HexChars
+
+	movi r2, 10
+
+	# find first digit
+
+	# use modulo operation
+
+	# remainder in r5
+	div r6, r4, r2 # / 10
+	muli r5, r6, 10
+	sub r5, r4, r5
+
+
+	# r5 is remainder
+	slli r5, r5, 2
+	add r9, r8, r5
+
+	ldw r10, 0(r9) # 6
+
+	# first digit in r10
+
+	# find second digit
+
+	div r4, r4, r2 # shift by 1 decimal char
+	
+	# use modulo operation
+
+	# remainder in r5
+	div r6, r4, r2
+	muli r5, r6, 10
+	sub r5, r4, r5
+
+	# r5 is remainder
+	slli r5, r5, 2
+	add r9, r8, r5
+
+	ldw r11, 0(r9) 
+	
+	# second digit in r11
+
+	# find third digit
+
+	div r4, r4, r2 # shift by 1 decimal char
+
+	# use modulo operation
+
+	# remainder in r5
+	div r6, r4, r2
+	muli r5, r6, 10
+	sub r5, r4, r5
+
+	# r5 is remainder
+	slli r5, r5, 2
+	add r9, r8, r5
+
+	ldw r12, 0(r9) 
+	
+	# third digit in r12
+
+	# find fourth digit
+
+	div r4, r4, r2 # shift by 1 decimal char
+
+	# use modulo operation
+
+	# remainder in r5
+	div r6, r4, r2
+	muli r5, r6, 10
+	sub r5, r4, r5
+
+	# r5 is remainder
+	slli r5, r5, 2
+	add r9, r8, r5
+
+	ldw r13, 0(r9) 
+	
+	# fourth digit in r13
+
+	# store first four digits
+
+	movi r5, 0
+
+	or r5,r5,r10
+
+	slli r11,r11,8
+	or r5,r5,r11
+
+	slli r12,r12,16
+	or r5,r5,r12
+
+	slli r13,r13,24
+	or r5,r5,r13
+
+	stwio r5, 0(r7)
+
+	# last two digits
+
+	# find fifth digit
+
+	div r4, r4, r2 # shift by 1 decimal char
+
+	# use modulo operation
+
+	# remainder in r5
+	div r6, r4, r2
+	muli r5, r6, 10
+	sub r5, r4, r5
+
+	# r5 is remainder
+	slli r5, r5, 2
+	add r9, r8, r5
+
+	ldw r10, 0(r9) 
+	
+	# 5th digit in r10
+
+	# find 6th digit
+
+	div r4, r4, r2 # shift by 1 decimal char
+
+	# use modulo operation
+
+	# remainder in r5
+	div r6, r4, r2
+	muli r5, r6, 10
+	sub r5, r4, r5
+
+	# r5 is remainder
+	slli r5, r5, 2
+	add r9, r8, r5
+
+	ldw r11, 0(r9) 
+	
+	# 6th digit in r11
+
+
+	# store last 2 digits
+
+	movi r5, 0
+
+	or r5,r5,r10
+
+	slli r11,r11,8
+	or r5,r5,r11
+
+	stwio r5, 16(r7)
 	ret
 

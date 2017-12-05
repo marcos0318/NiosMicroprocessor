@@ -4,7 +4,7 @@
 
 void printOct ( int val ) { printf ("%o\n", val); }
 
-void printHex ( int val ) { printf ("%X\n", val); }
+void printHex ( int val ) { printf ("%X\n", val); } 
 
 void printDec ( int val ) { printf ("%u\n", val); }
 
@@ -30,37 +30,9 @@ void write_pixel(int x, int y, short colour) {
 */
 
 
-/*the print screen function takes the address of the game board
+/*the print screen function takes the address of the game board 
 and print it to the VGA out put by using write block function*/
 // 320 = 107*3 -1, just take 100 as the offset of x
-int mockBoard[240] = {
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,2,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,1,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,2,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,1,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,3,0,0,0,0,
-  0,0,0,0,0,3,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,
-};
-
-
 
 /* we have board as 24*10. the height of the screen is 240
 then the size of a single block is 10*10, so we scale the block
@@ -75,37 +47,21 @@ void print_block(int a, int b, short colour) {
 }
 
 void print_gameboard(int* board_addr) {
-  printf("print_gameboard %i",board_addr);
   int x, y;
   for (y=0; y<24; y++) {
     for (x=0; x<10; x++) {
       if (*board_addr == 1)
-        print_block(x*10 + 100, y*10, 0xffcc);
+        print_block(x*10 + 100, y*10, 0xcccc);
       else if (*board_addr == 0)
         print_block(x*10 + 100, y*10, 0xffff);
-      else if (*board_addr == 2)
+      else if (*board_addr == 2 || *board_addr == 3)
         print_block(x*10 + 100, y*10, 0xf800);
-      else if (*board_addr == 3)
-        print_block(x*11 + 100, y*10, 0x0fff); // center
       board_addr++;
     }
   }
   return;
 }
 
-
-/* use write_pixel to set entire screen to black (does not clear the character buffer) */
-void clear_screen() {
-
-  //int x, y;
-  //for (x = 0; x < 320; x++) {
-  //for (y = 0; y < 240; y++) {
-	 //write_pixel(x,y,0xf800);
-
-	//}
-  //
-  print_gameboard(mockBoard);
-}
 
 // checks if block underneath is occupied and by what
 int block_below(int* board_addr, int block) {
@@ -134,11 +90,9 @@ void copy_board(int* new_board, int* board_addr) {
 	}
 }
 int descend(int* board_addr){
-	printf("descend %i\n",board_addr);
 	if(is_clear(board_addr) == 0) {
 		return 0;
 	}
-	printf("clear");
 	int i;
 	int temp_board[240];
 	for(i=0;i<240;i++) temp_board[i]=0;
