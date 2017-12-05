@@ -4,7 +4,7 @@
 
 void printOct ( int val ) { printf ("%o\n", val); }
 
-void printHex ( int val ) { printf ("%X\n", val); } 
+void printHex ( int val ) { printf ("%X\n", val); }
 
 void printDec ( int val ) { printf ("%u\n", val); }
 
@@ -30,7 +30,7 @@ void write_pixel(int x, int y, short colour) {
 */
 
 
-/*the print screen function takes the address of the game board 
+/*the print screen function takes the address of the game board
 and print it to the VGA out put by using write block function*/
 // 320 = 107*3 -1, just take 100 as the offset of x
 int mockBoard[240] = {
@@ -86,7 +86,7 @@ void print_gameboard(int* board_addr) {
       else if (*board_addr == 2)
         print_block(x*10 + 100, y*10, 0xf800);
       else if (*board_addr == 3)
-		print_block(x*10 + 100, y*10, 0x0fff); // center
+        print_block(x*11 + 100, y*10, 0x0fff); // center
       board_addr++;
     }
   }
@@ -101,7 +101,7 @@ void clear_screen() {
   //for (x = 0; x < 320; x++) {
   //for (y = 0; y < 240; y++) {
 	 //write_pixel(x,y,0xf800);
-	  
+
 	//}
   //
   print_gameboard(mockBoard);

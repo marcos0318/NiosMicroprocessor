@@ -210,3 +210,55 @@ void move_block(int* board_addr, int direction) {
   print_gameboard(board_addr);
 }
 
+void zeroOutTakenUntil(int *board_addr, int line_number) {
+  // line number is from 0 to 23
+  int upper_bound = (line_number+1)* 10;
+  int i;
+  for (i = 0; i< upper_bound  ;i++) {
+    if (board_addr[i] == 1) {
+      board_addr[i] = 0;
+    }
+  }
+}
+
+int isLineFilled(int* board_addr, int line_number) {
+  // line is from 0 to 23
+  int filled == 1;
+  int i;
+  for (i = 0; i < 10; i++) {
+    if (board_addr[line_number*10 + i] != 1) {
+      filled == 0;
+    }
+  }
+  return filled;
+}
+
+int moveDownTakenBy(int* board_addr, int line_number) {
+  int local_board[240] = {0};
+  copy_board(local_board, board_addr);
+  zeroOutTakenUntil(local_board, line_number);
+  int i;
+  for (i=0; i< (line_number-1)*10; i++) {
+    if (board_addr[i] == 1) {
+      local_board[i+10] = 1;
+    }
+  }
+  copy_board(board_addr, local_board);
+}
+
+void check_line_filled (int *board_addr) {
+  int cleared_lines = 0;
+  // we check from to to the end
+  // if a line is all taken, o out that line, move the taken blocks above down by1
+  // then add to the cleared_lines counter
+  int i;
+  for (i=0; i<24; i++) {
+    if (isLineFilled(board_addr, i) == 1) {
+      cleared_lines ++;
+      moveDownTakenBy(board_addr, i);
+    }
+  }
+
+  // then print the board
+
+}
