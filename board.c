@@ -15,8 +15,8 @@
                       2  2
 */
 void randomInit() {
-  float n = time(NULL);   
-  printf("%.2f\n" , n);      
+  float n = time(NULL);
+  printf("%.2f\n" , n);
   srand(time(NULL));
 }
 
@@ -87,7 +87,34 @@ void createNewBlock(int* board_addr, int* gamestate) {
   }
 }
 
+// 240 means cannot find a center
+int find_center (int* gameboard) {
+  int i;
+  for (i=0; i<240; i++) {
+    if (gameboard[i] == 3) {
+      return i;
+    }
+  }
+  return 240;
+}
 
+// returns 240 when it is out of boundary
+// returns the block number after rotate clockwise
+int rotate_from (int center, int block) {
+  int center_x = center % 10;
+  int center_y = center / 10;
+  int block_x = block % 10;
+  int block_y = block / 10;
+  int vector_x = block_x - center_x;
+  int vector_y = block_y - center_y;
+  int after_x = center_x + vector_y;
+  int after_y = center_y - vector_x;
+  // if after the rotate the things get out of the scope
+  if (after_x < 0 || after_x > 9 || after_y < 0 || after_y > 23) {
+    return 240;
+  }
+  return after_y * 10 + after_x;
+}
 
 void remove_falling_block(int* board_addr) {
   int i;
@@ -105,14 +132,20 @@ void remove_falling_block(int* board_addr) {
 
 void move_block(int* board_addr, int direction) {
   // 0   1  2   3
-  // left up down right
+  // left rotate down right
   printf("%d\n", direction);
   int temp_board[240]={0};
-
+  int center;
   int i;
   int valid = 1;
   int x_min = 10;
   int x_max = -1;
+  center = find_center(board_addr);
+  if (center == 240) {
+    printf("There is no center in the board\n");
+    return;
+  }
+
   // check x the min and max of block
   for (i=0; i<240; i++) {
     if ( *(board_addr+i) > 1 && *(board_addr+i) < 4) {
@@ -123,13 +156,11 @@ void move_block(int* board_addr, int direction) {
 
       // if on the boundary and coresbonding move is invalid
       if (x_min == 0 && direction == 0) {
-		printf("return because of x_min 0, direction 1\n");
-		return;
-	  }
+        return;
+      }
       if (x_max == 9 && direction == 3) {
-		printf("return because of x_max 9, direction 3\n");
-		return;
-	  }
+        return;
+      }
     }
   }
 
@@ -139,20 +170,27 @@ void move_block(int* board_addr, int direction) {
     if ( *(board_addr+i) > 1 && *(board_addr+i) < 4) {
       if (direction == 0) {
         if ( *(board_addr+i-1)==1){
-			printf("return because of block left side is taken\n");
-			return;
-		} 
+          	return;
+        }
       } else if (direction == 3) {
-        if ( *(board_addr+i+1)==1){ 
-			printf("return because of block right side is taken\n");
-			return;
-		}
+        if ( *(board_addr+i+1)==1){
+          return;
+        }
+      } else if (direction == 1) {
+        int new_block_num = rotate_from(center, i);
+        if ( new_block_num == 240 ) {
+          printf("rotate out of boundary\n");
+          return;
+        }
+        if ( board_addr[new_block_num] = 1) {
+          printf("rotate to a taken block\n");
+          return;
+        }
       }
     }
   }
 
   // things are valid, move the block
-  printf("\n\nhere\n");
   copy_board(temp_board, board_addr);
   remove_falling_block(temp_board);
 
@@ -162,6 +200,9 @@ void move_block(int* board_addr, int direction) {
         temp_board[i-1] = board_addr[i];
       } else if (direction == 3) {
         temp_board[i+1] = board_addr[i];
+      } else if (direction == 1) {
+        int new_block_num = rotate_from(center, i);
+        temp_board[new_block_num] = board_addr[i];
       }
     }
   }
